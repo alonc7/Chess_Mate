@@ -1,4 +1,4 @@
-import { TeamType } from "../Types";
+import { TeamType } from "../../Types";
 import { Piece, Position } from "../models";
 
 export const tileIsOccupied = (position: Position, boardState: Piece[]): boolean => {

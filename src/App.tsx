@@ -1,8 +1,8 @@
 // App.js
 import React, { useState } from 'react';
-import GameContainer from './Components/GameContainer/GameContainer';
-import MainMenu from './Components/MainMenu/MainMenu';
 import './App.css'
+import MainMenu from './Client/Components/MainMenu/MainMenu';
+import GameContainer from './Client/Components/GameContainer/GameContainer';
 const App: React.FC = () => {
   const [gameId, setGameId] = useState<string>('');
 

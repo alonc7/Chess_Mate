@@ -1,4 +1,4 @@
-import { TeamType, PieceType } from "../Types";
+import { TeamType, PieceType } from "../../Types";
 import { Position } from "./Position";
 
 export class Piece {

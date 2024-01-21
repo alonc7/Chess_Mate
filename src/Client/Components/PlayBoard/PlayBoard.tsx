@@ -1,9 +1,9 @@
 import { useRef, useState } from "react";
 import "./PlayBoard.css";
 
-import { Piece, Position } from "../../models";
-import { GRID_SIZE, HORIZONTAL_AXIS, VERTICAL_AXIS } from "../../Constents";
 import Tile from "../Tile/Tile";
+import { Piece, Position } from "../../models";
+import { GRID_SIZE, HORIZONTAL_AXIS, VERTICAL_AXIS } from "../../../Constents";
 
 interface Props {
   playMove: (piece: Piece, position: Position) => Promise<boolean>;

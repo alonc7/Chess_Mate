@@ -1,7 +1,7 @@
-import { Board } from "./models/Board";
-import { Pawn } from "./models/Pawn";
-import { Piece } from "./models/Piece";
-import { Position } from "./models/Position";
+import { Board } from "./Client/models/Board";
+import { Pawn } from "./Client/models/Pawn";
+import { Piece } from "./Client/models/Piece";
+import { Position } from "./Client/models/Position";
 import { PieceType, TeamType } from "./Types";
 
 export const VERTICAL_AXIS = ["1", "2", "3", "4", "5", "6", "7", "8"];

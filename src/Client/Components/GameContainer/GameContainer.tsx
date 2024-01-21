@@ -1,9 +1,9 @@
 // GameContainer.tsx
 import React, { useState } from 'react';
-import Referee from '../Referee/Referee';
-import Camera from '../Camera/Camera';
 import './GameContainer.css'; // Import the CSS file
 import WebSocketComponent from '../WebSocket/WebSocketComponent';
+import Referee from '../Referee/Referee';
+import Camera from '../Camera/Camera';
 
 interface GameContainerProps {
     gameId: string;

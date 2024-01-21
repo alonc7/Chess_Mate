@@ -2,10 +2,11 @@ import { useEffect, useRef, useState } from "react";
 import { Piece, Position } from "../../models";
 import { Board } from "../../models/Board";
 import { Pawn } from "../../models/Pawn";
-import { PieceType, TeamType } from "../../Types";
-import { initialBoard } from "../../Constents";
+
 import Chessboard from "../PlayBoard/PlayBoard";
 import "./Referee.css"
+import { initialBoard } from "../../../Constents";
+import { PieceType, TeamType } from "../../../Types";
 
 export default function Referee({ gameID }: { gameID: string }) {
 

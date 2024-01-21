@@ -1,6 +1,6 @@
 import React from 'react';
 import Lottie from 'lottie-react';
-import loader from '../../../public/assets/Lottie/loading.json';
+import loader from '../../../../public/assets/Lottie/loading.json';
 import './Loader.css'; // Import the CSS file
 
 const Loader: React.FC = () => {

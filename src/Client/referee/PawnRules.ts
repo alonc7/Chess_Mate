@@ -1,4 +1,4 @@
-import { TeamType } from "../Types";
+import { TeamType } from "../../Types";
 import { Piece, Position } from "../models";
 import { Pawn } from "../models/Pawn";
 import { tileIsOccupied, tileIsOccupiedByOpponent } from "./GeneralLogic";
