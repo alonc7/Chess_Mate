@@ -13,4 +13,4 @@ class Position:
         return Position(self.x, self.y)
 
     def to_dict(self):
-        return {'x': self.x, 'y': self.y}
+        return {"x": self.x, "y": self.y}

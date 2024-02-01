@@ -3,7 +3,6 @@ from server_referee.general_logic import tile_is_occupied, tile_is_occupied_by_o
 
 
 def is_knight_valid_move(new_position, initial_position, team, board_state):
-    print(f"Inside is_knight_move_valid: ...")
     delta_x = abs(new_position.x - initial_position.x)
     delta_y = abs(new_position.y - initial_position.y)
 

@@ -68,8 +68,7 @@ piece_type_rules: Dict[str, callable] = {
     },
     'pawn': {
         'is_valid_move': is_pawn_valid_move,
-    }
-    ,
+    },
     'knight': {
         'is_valid_move': is_knight_valid_move,
     },
@@ -86,12 +85,13 @@ piece_type_rules: Dict[str, callable] = {
 
 
 async def is_valid_move(played_piece: Dict, destination: Position, cloned_board: List[List[Dict]]) -> bool:
-    # print('destination as recieed to method to is_valid_move=>:', destination.x, destination.y)
+    print('destination as recieed to method to is_valid_move=>:',
+          destination.x, destination.y)
     possible_moves = played_piece['possibleMoves']
     start_position = Position(
         played_piece['position']['x'], played_piece['position']['y'])
     piece_type = played_piece['type']
-    # print('Chick-Check', destination.to_dict() in possible_moves)
+    # # print('Chick-Check', destination.to_dict() in possible_moves)
     # print(f"Checking move for piece: {played_piece} to {destination}")
 
     if piece_type in piece_type_rules:
@@ -100,12 +100,9 @@ async def is_valid_move(played_piece: Dict, destination: Position, cloned_board:
         if destination.to_dict() in possible_moves:
             # print('check 2')
             await asyncio.sleep(0)
-            # destination_instance = Position(destination['x'], destination['y'])
-            # if validation_func(destination_instance, start_position, played_piece['team'], cloned_board):
             if validation_func(destination, start_position, played_piece['team'], cloned_board):
-                # print('Valid move: Finished')
+                print('Valid move: Finished')
                 return True
-    # print('Invalid move')
     return False
 
 
@@ -115,13 +112,9 @@ async def make_move(game_id: str, move: Dict):
         played_piece = move['payload']['playedPiece']
         destination = Position(**move['payload']['destination'])
         cloned_board = move['payload']['clonedBoard']
-        # print('destination as recieved to make_move:', destination)
-            # print(destination)
-            # print(type(destination))
-            # print(destination.x)
-
+        
         is_valid = await is_valid_move(played_piece, destination, cloned_board)
-
+        print('is_valid', is_valid)
         log_message = f"Move is {'valid' if is_valid else 'invalid'}: {played_piece} to {destination}"
         print(log_message)
 

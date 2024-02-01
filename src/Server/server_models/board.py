@@ -132,9 +132,11 @@ class Board:
         return True
 
     def to_dict(self):
+        serialized_pieces = [piece.to_dict() for piece in self.pieces]
+
         return {
-            "pieces": self.pieces,
-            "totalTurns": self.totalTurns
+            "pieces": serialized_pieces,
+            "total_turns": self.total_turns,
         }
 
     def clone(self) -> 'Board':
