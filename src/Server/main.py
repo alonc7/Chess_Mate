@@ -1,3 +1,4 @@
+from fastapi import HTTPException
 from fastapi import FastAPI, WebSocket, HTTPException, WebSocketDisconnect
 from fastapi.responses import HTMLResponse
 from fastapi.middleware.cors import CORSMiddleware
@@ -7,13 +8,13 @@ import uuid
 from server_models.chessboard import initial_board
 from server_models.position import Position
 from server_referee.bishop_rules import is_bishop_move_valid
-from server_referee.pawn_rules import is_pawn_valid_move, get_possible_pawn_moves
-from server_referee.knight_rules import is_knight_valid_move, get_possible_knight_moves
-from server_referee.rook_rules import is_rook_valid_move, get_possible_rook_moves
-from server_referee.queen_rules import is_queen_valid_move, get_possible_queen_moves
-from server_referee.king_rules import is_king_valid_move, get_possible_king_moves
+from server_referee.pawn_rules import is_pawn_valid_move
+from server_referee.knight_rules import is_knight_valid_move
+from server_referee.rook_rules import is_rook_valid_move
+from server_referee.queen_rules import is_queen_valid_move
+from server_referee.king_rules import is_king_valid_move
 import asyncio
-
+# uvicorn main:app --reload
 app = FastAPI()
 
 app.add_middleware(
@@ -144,9 +145,10 @@ async def broadcast_game_state(game_id: str):
         await ws.send_text(json.dumps(updated_state))
 
 
-@app.get("/game_state/{game_id}")
-async def get_game_state(game_id: str):
+@app.get("/get_latest_game_state/{game_id}")
+async def get_latest_game_state(game_id: str):
     if game_id in games:
+        # Assuming games[game_id].chessboard contains the latest game state
         return {"chessboard": games[game_id].chessboard}
     else:
         raise HTTPException(status_code=404, detail="Game not found")
@@ -172,7 +174,7 @@ async def send_current_state_to_player(websocket: WebSocket, game_id: str):
         await websocket.send_text(json.dumps(current_state))
     else:
         await websocket.close()
-        
+
 
 # @app.websocket("/ws/{game_id}")
 # async def websocket_endpoint(websocket: WebSocket, game_id: str):

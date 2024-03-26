@@ -63,7 +63,24 @@ export default function PlayBoard({ playMove, pieces, opponentMoves }: Props) {
       }
     }
   }
+  // Function to request the latest game state from the server
+  async function requestLatestGameState() {
+    try {
+      // Send a request to the server to fetch the latest game state
+      const response = await fetch('/get_latest_game_state');
+      if (!response.ok) {
+        throw new Error('Failed to fetch latest game state');
+      }
 
+      // Parse the response
+      const gameState = await response.json();
+      updateGameState(gameState);
+      // Update the local game state with the received data
+      // For example, update the 'pieces' and 'opponentMoves' state variables
+    } catch (error) {
+      console.error('Error fetching latest game state:', error);
+    }
+  }
   async function dropPiece(e: React.MouseEvent) {
     const chessboard = chessboardRef.current;
     if (activePiece && chessboard) {
@@ -80,10 +97,18 @@ export default function PlayBoard({ playMove, pieces, opponentMoves }: Props) {
           activePiece.style.removeProperty("top");
           activePiece.style.removeProperty("left");
         }
+
+        if (success) {
+          // Request the latest game state from the server after a successful move
+          await requestLatestGameState();
+        }
       }
       setActivePiece(null);
     }
   }
+
+
+
 
   let board = [];
 
@@ -140,3 +165,9 @@ export default function PlayBoard({ playMove, pieces, opponentMoves }: Props) {
     </>
   );
 }
+
+
+function updateGameState(gameState: any) {
+  throw new Error("Function not implemented.");
+}
+

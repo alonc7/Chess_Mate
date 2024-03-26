@@ -21,12 +21,13 @@ export default function Referee({ gameID }: { gameID: string }) {
     useEffect(() => {
         const handleWebSocketMessage = (event: MessageEvent) => {
             const message = JSON.parse(event.data);
-
+            // console.log(message.type);
             if (message.type === 'move') {
                 const { playedPiece, destination, clonedBoard } = message.payload;
 
                 setOpponentMoves((prevMoves) => [...prevMoves, { playedPiece, destination }]);
-                setBoard(clonedBoard);
+                setBoard(clonedBoard); //original code.
+                // setBoard(message);
                 playMove(playedPiece, destination);
 
                 console.log('Opponent move received:', { playedPiece, destination });
@@ -168,6 +169,7 @@ export default function Referee({ gameID }: { gameID: string }) {
 
         return false; // move is not valid.
     };
+
 
     // Function to send a request to the server for move validation
     // async function validateMoveOnServer(playedPiece: Piece, destination: Position): Promise<boolean> {
