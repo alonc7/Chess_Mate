@@ -4,44 +4,44 @@ import { Board } from "../../models/Board";
 import { Pawn } from "../../models/Pawn";
 
 import Chessboard from "../PlayBoard/PlayBoard";
-import "./Referee.css"
+import "./Referee.css";
 import { initialBoard } from "../../../Constents";
 import { PieceType, TeamType } from "../../../Types";
 
 export default function Referee({ gameID }: { gameID: string }) {
-
     const [board, setBoard] = useState<Board>(initialBoard.clone());
     const [promotionPawn, setPromotionPawn] = useState<Piece>();
     const modalRef = useRef<HTMLDivElement>(null);
     const checkmateModalRef = useRef<HTMLDivElement>(null);
+    const [opponentMoves, setOpponentMoves] = useState<{ playedPiece: Piece; destination: Position }[]>([]);
+
     // Establish WebSocket connection
     const socket = new WebSocket(`ws://127.0.0.1:8000/ws/${gameID}`);
 
     useEffect(() => {
-
         const handleWebSocketMessage = (event: MessageEvent) => {
-            // Handle message received from the server
             const message = JSON.parse(event.data);
-            // Update the game state based on the message received
-            // Might need to define a protocol for the message
-            // For example, { type: 'move', payload: { playedPiece, destination } }
 
             if (message.type === 'move') {
-                const { playedPiece, destination } = message.payload;
+                const { playedPiece, destination, clonedBoard } = message.payload;
+
+                setOpponentMoves((prevMoves) => [...prevMoves, { playedPiece, destination }]);
+                setBoard(clonedBoard);
                 playMove(playedPiece, destination);
+
+                console.log('Opponent move received:', { playedPiece, destination });
+                console.log('Updated opponent moves:', opponentMoves);
             }
-
-            // event listener for WebSocket messages
-            socket.addEventListener('message', handleWebSocketMessage);
-
-            //Cleanup function
-            return () => {
-                socket.removeEventListener('message', handleWebSocketMessage);
-                socket.close(); // close the socket connection
-            };
         };
 
-    }, [gameID]);
+        socket.addEventListener('message', handleWebSocketMessage);
+
+        return () => {
+            socket.removeEventListener('message', handleWebSocketMessage);
+            socket.close();
+        };
+    }, [gameID, opponentMoves]);
+
 
 
     // function playMove(playedPiece: Piece, destination: Position): boolean {
@@ -169,7 +169,6 @@ export default function Referee({ gameID }: { gameID: string }) {
         return false; // move is not valid.
     };
 
-
     // Function to send a request to the server for move validation
     // async function validateMoveOnServer(playedPiece: Piece, destination: Position): Promise<boolean> {
     async function validateMoveOnServer(playedPiece: Piece, destination: Position, clonedBoard: Board) {
@@ -283,8 +282,7 @@ export default function Referee({ gameID }: { gameID: string }) {
                     </div>
                 </div>
             </div>
-            <Chessboard playMove={playMove}
-                pieces={board.pieces} />
+            <Chessboard playMove={playMove} pieces={board.pieces} opponentMoves={opponentMoves} />
         </>
     )
 };

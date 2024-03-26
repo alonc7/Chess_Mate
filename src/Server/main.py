@@ -32,6 +32,8 @@ class Game:
         self.players = []
         self.websockets = set()
         self.chessboard = initial_board
+        # Generate a 6-character join code
+        self.join_code = str(uuid.uuid4())[:6]
 
 
 def get_game(game_id: str = None):
@@ -43,23 +45,25 @@ def get_game(game_id: str = None):
 @app.post("/create_game")
 async def create_game():
     game_id = str(uuid.uuid4())
-    games[game_id] = Game()
+    games[game_id] = Game()  # Create an instance of the Game class
+    join_code = str(uuid.uuid4())[:6]  # Generate a join code
+    games[game_id].join_code = join_code
     initial_state = {
         "type": "initial_state",
-        "payload": {"chessboard": games[game_id].chessboard}
+        "payload": {"chessboard": games[game_id].chessboard, "join_code": join_code}
     }
     for ws in games[game_id].websockets:
         await ws.send_text(json.dumps(initial_state))
-    return {"game_id": game_id}
+    return {"game_id": game_id, "join_code": join_code}
 
 
-@app.post("/join_game/{game_id}")
-def join_game(game_id: str):
-    if game_id in games:
-        games[game_id].players.append("Player2")
-        return {"message": "Player2 joined the game"}
-    else:
-        return {"error": "No game found"}
+@app.post("/join_game/{join_code}")
+def join_game(join_code: str):
+    for game_id, game in games.items():
+        if game.join_code == join_code:
+            game.players.append("Player2")
+            return {"game_id": game_id, "message": "Player2 joined the game"}
+    return {"error": "No game found"}
 
 
 piece_type_rules: Dict[str, callable] = {
@@ -112,9 +116,14 @@ async def make_move(game_id: str, move: Dict):
         played_piece = move['payload']['playedPiece']
         destination = Position(**move['payload']['destination'])
         cloned_board = move['payload']['clonedBoard']
-        
+
         is_valid = await is_valid_move(played_piece, destination, cloned_board)
         print('is_valid', is_valid)
+
+        if is_valid:
+            # Update the chessboard state in the Game instance
+            games[game_id].chessboard = move  # why not move?
+
         log_message = f"Move is {'valid' if is_valid else 'invalid'}: {played_piece} to {destination}"
         print(log_message)
 
@@ -126,6 +135,76 @@ async def make_move(game_id: str, move: Dict):
         raise HTTPException(status_code=500, detail="Internal Server Error")
 
 
+async def broadcast_game_state(game_id: str):
+    updated_state = {
+        "type": "chessboard_update",
+        "payload": {"chessboard": games[game_id].chessboard}
+    }
+    for ws in games[game_id].websockets:
+        await ws.send_text(json.dumps(updated_state))
+
+
+@app.get("/game_state/{game_id}")
+async def get_game_state(game_id: str):
+    if game_id in games:
+        return {"chessboard": games[game_id].chessboard}
+    else:
+        raise HTTPException(status_code=404, detail="Game not found")
+
+
+async def send_current_state_to_player(websocket: WebSocket, game_id: str):
+    if game_id in games:
+        current_state = {
+            "type": "chessboard_update",
+            "payload": {"chessboard": games[game_id].chessboard}
+        }
+        await websocket.send_text(json.dumps(current_state))
+    else:
+        await websocket.close()
+
+
+async def send_current_state_to_player(websocket: WebSocket, game_id: str):
+    if game_id in games:
+        current_state = {
+            "type": "chessboard_update",
+            "payload": {"chessboard": games[game_id].chessboard}
+        }
+        await websocket.send_text(json.dumps(current_state))
+    else:
+        await websocket.close()
+        
+
+# @app.websocket("/ws/{game_id}")
+# async def websocket_endpoint(websocket: WebSocket, game_id: str):
+#     try:
+#         await websocket.accept()
+
+#         if game_id not in games:
+#             games[game_id] = Game()
+#             initial_state = {"type": "initial_state", "payload": {
+#                 "chessboard": games[game_id].chessboard}}
+#             await websocket.send_text(json.dumps({"type": "chessboard_update", "payload": {"chessboard": games[game_id].chessboard}}))
+
+#         if game_id in games:
+#             games[game_id].websockets.add(websocket)
+
+#             try:
+#                 while True:
+#                     data = await websocket.receive_text()
+#                     moves = json.loads(data)
+#                     await make_move(game_id, moves)
+#                     for ws in games[game_id].websockets:
+#                         await ws.send_text(data)
+#             except WebSocketDisconnect:
+#                 pass
+#             finally:
+#                 games[game_id].websockets.remove(websocket)
+#         else:
+#             await websocket.close()
+#     except Exception as e:
+#         print(f"Error in WebSocket endpoint: {e}")
+
+
 @app.websocket("/ws/{game_id}")
 async def websocket_endpoint(websocket: WebSocket, game_id: str):
     try:
@@ -133,9 +212,18 @@ async def websocket_endpoint(websocket: WebSocket, game_id: str):
 
         if game_id not in games:
             games[game_id] = Game()
-            initial_state = {"type": "initial_state", "payload": {
-                "chessboard": games[game_id].chessboard}}
-            await websocket.send_text(json.dumps({"type": "chessboard_update", "payload": {"chessboard": games[game_id].chessboard}}))
+            initial_state = {
+                "type": "initial_state",
+                "payload": {"chessboard": games[game_id].chessboard},
+            }
+            await websocket.send_text(
+                json.dumps(
+                    {
+                        "type": "chessboard_update",
+                        "payload": {"chessboard": games[game_id].chessboard},
+                    }
+                )
+            )
 
         if game_id in games:
             games[game_id].websockets.add(websocket)
@@ -143,6 +231,7 @@ async def websocket_endpoint(websocket: WebSocket, game_id: str):
             try:
                 while True:
                     data = await websocket.receive_text()
+                    print('Received message from client:', data)
                     moves = json.loads(data)
                     await make_move(game_id, moves)
                     for ws in games[game_id].websockets:

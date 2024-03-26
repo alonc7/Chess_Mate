@@ -6,10 +6,15 @@ import Referee from '../Referee/Referee';
 import Camera from '../Camera/Camera';
 
 interface GameContainerProps {
-    gameId: string;
+    // gameId: string;
+    // joinCode:string;
+    currentGame: {
+        gameId: string,
+        joinCode: string
+    }
 }
 
-const GameContainer: React.FC<GameContainerProps> = ({ gameId }) => {
+const GameContainer: React.FC<GameContainerProps> = ({ currentGame }) => {
     const [allowCamera, setAllowCamera] = useState<boolean>(false);
     // const [gameState, setGameState] = useState<any>({}); // Update with your actual game state type
 
@@ -17,15 +22,12 @@ const GameContainer: React.FC<GameContainerProps> = ({ gameId }) => {
         setAllowCamera((prev) => !prev);
     };
 
-    // const handleWebSocketMessage=(message:string) => {
-
-    // }
     return (
         <div className="game-container">
             <div className="game-content">
-                <Referee gameID={gameId} />
+                <Referee gameID={currentGame.gameId} />
             </div>
-            <WebSocketComponent gameID={gameId} onMessage={(message) => console.log(message)} />
+            <WebSocketComponent gameID={currentGame.gameId} onMessage={(message) => console.log(message)} />
             {allowCamera && (
                 <div className="camera-container">
                     <Camera />
@@ -41,7 +43,8 @@ const GameContainer: React.FC<GameContainerProps> = ({ gameId }) => {
                 </button>
             )}
 
-            <p className="game-id">Game ID: {gameId}</p>
+            <p className="game-id">Game ID: {currentGame.gameId}</p>
+            <p className="join-code">Join Code: {currentGame.joinCode}</p>
         </div>
     );
 };

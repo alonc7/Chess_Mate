@@ -13,18 +13,8 @@ def tile_is_occupied(position: Position, board_state: List[Piece]) -> bool:
     return bool(piece)
 
 
-def tell_the_type(piece: Piece):
-    return type(piece)
-
-
-# def tile_is_occupied_by_opponent(position: Position, board_state: List[Piece], team: TeamType) -> bool:
-#     return any(piece.position == position and piece.team != team for piece in board_state)
-
 def tile_is_occupied_by_opponent(position: Position, board_state: List[Piece], team: TeamType) -> bool:
-    for piece in board_state:
-        if isinstance(piece, Piece) and piece.position == position and piece.team != team:
-            return True
-    return False
+    return any(piece.position == position and piece.team != team for piece in board_state)
 
 
 def tile_is_occupied_by_opponent2(new_position: Position, initial_position: Position, board_state: dict, team: str) -> bool:
@@ -32,11 +22,13 @@ def tile_is_occupied_by_opponent2(new_position: Position, initial_position: Posi
 
     if (
         (new_position.x - initial_position.x == 1 and new_position.y - initial_position.y == pawn_direction) or
-        (new_position.x - initial_position.x == -1 and new_position.y - initial_position.y == pawn_direction)
+        (new_position.x - initial_position.x == -
+         1 and new_position.y - initial_position.y == pawn_direction)
     ):
         for piece in board_state["pieces"]:
             opponent_condition = (
-                str(piece['team']) != team and  # Check if it's the opponent's piece
+                # Check if it's the opponent's piece
+                str(piece['team']) != team and
                 str(piece['position']) == str(new_position)
             )
             if opponent_condition:
@@ -44,7 +36,6 @@ def tile_is_occupied_by_opponent2(new_position: Position, initial_position: Posi
                 return True
 
     return False
-
 
 
 def tile_is_empty_or_occupied(position: Position, board_state: List[Piece], team: TeamType) -> bool:

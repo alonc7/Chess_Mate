@@ -1,30 +1,34 @@
+// MainMenu.tsx
 import { useState } from 'react';
 import axios from 'axios';
 import Loader from './Loader';
+import { useNavigate } from 'react-router-dom';
 import './MainMenu.css';
 
-type Props = {
-    onGameCreated: (gameId: string) => void;
-};
+interface Props {
+    onGameCreated: (gameId: string, join_code: string) => void;
+}
 
 const MainMenu = ({ onGameCreated }: Props) => {
     const [gameId, setGameId] = useState('');
     const [joinGameId, setJoinGameId] = useState('');
     const [loading, setLoading] = useState(false);
+    const navigate = useNavigate(); // Initialize useNavigate hook
 
     const handleCreateOrUpdateGame = async (apiEndpoint: string, successMessage: string) => {
         try {
-            console.log('http://localhost:8000/create_game');
-
             setLoading(true);
-
             const response = await axios.post(apiEndpoint);
 
-            const { game_id } = response.data;
-            // const  game_id  ='123';
+            const { game_id, join_code } = response.data;
+            console.log(game_id, join_code);
+
             setGameId(game_id);
-            onGameCreated(game_id);
+            onGameCreated(game_id, join_code);
             console.log(successMessage, game_id);
+
+            // Navigate to the game container after game creation
+            navigate(`/game/${game_id}`);
         } catch (error) {
             console.error(`Error ${successMessage.toLowerCase()}:`, error);
         } finally {
